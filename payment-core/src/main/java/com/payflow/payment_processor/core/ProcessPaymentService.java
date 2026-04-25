@@ -1,4 +1,4 @@
-package com.payflow.payment_processor.core.usecase;
+package com.payflow.payment_processor.core;
 
 import com.payflow.payment_processor.core.domain.Payment;
 import com.payflow.payment_processor.core.domain.PaymentStatus;

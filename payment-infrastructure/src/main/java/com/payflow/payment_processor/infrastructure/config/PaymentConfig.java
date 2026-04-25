@@ -3,7 +3,7 @@ package com.payflow.payment_processor.infrastructure.config;
 import com.payflow.payment_processor.core.ports.inbound.ProcessPaymentUseCase;
 import com.payflow.payment_processor.core.ports.outbound.PaymentExternalProviderPort;
 import com.payflow.payment_processor.core.ports.outbound.PaymentRepositoryPort;
-import com.payflow.payment_processor.core.usecase.ProcessPaymentService;
+import com.payflow.payment_processor.core.ProcessPaymentService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
