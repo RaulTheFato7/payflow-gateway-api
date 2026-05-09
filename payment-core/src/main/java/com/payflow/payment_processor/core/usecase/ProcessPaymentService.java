@@ -1,4 +1,4 @@
-package com.payflow.payment_processor.core;
+package com.payflow.payment_processor.core.usecase;
 
 import com.payflow.payment_processor.core.domain.Payment;
 import com.payflow.payment_processor.core.domain.PaymentStatus;
@@ -18,15 +18,18 @@ public class ProcessPaymentService implements ProcessPaymentUseCase {
     @Override
     public Payment execute(Payment payment) {
         Optional<Payment> existingPayment = repositoryPort.findByIdempotencyKey(payment.getIdempotencyKey());
-        if (existingPayment.isPresent()) {
-            return existingPayment.get();
-        }
-        payment.setStatus(PaymentStatus.PENDING);
+        if (existingPayment.isPresent()) return existingPayment.get();
+
+        payment.updateStatus(PaymentStatus.PENDING);
         Payment savedPayment = repositoryPort.save(payment);
 
-        PaymentStatus resultStatus = externalProviderPort.authorize(savedPayment);
+        try {
+            PaymentStatus resultStatus = externalProviderPort.authorize(savedPayment);
+            savedPayment.updateStatus(resultStatus);
+        } catch (Exception e) {
+            savedPayment.updateStatus(PaymentStatus.FAILED);
+        }
 
-        savedPayment.setStatus(resultStatus);
         return repositoryPort.save(savedPayment);
     }
 }

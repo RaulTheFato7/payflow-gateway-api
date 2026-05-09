@@ -1,6 +1,5 @@
 package com.payflow.payment_processor.core.usecase;
 
-import com.payflow.payment_processor.core.ProcessPaymentService;
 import com.payflow.payment_processor.core.domain.Payment;
 import com.payflow.payment_processor.core.domain.PaymentStatus;
 import com.payflow.payment_processor.core.ports.outbound.PaymentExternalProviderPort;
@@ -64,6 +63,19 @@ class ProcessPaymentServiceTest {
 
         verify(repositoryPort, times(1)).findByIdempotencyKey("new-key-221");
         verify(externalProviderPort, times(1)).authorize(any(Payment.class));
+        verify(repositoryPort, times(2)).save(any(Payment.class));
+    }
+    @Test
+    @DisplayName("Deve marcar como FAILED quando o provedor externo lança uma exceção tecnica")
+    void deveMarcarComoFalhadoNoErroTecnico() {
+        Payment request = Payment.builder().idempotencyKey("errorKey").amount(new BigDecimal("50.0")).build();
+
+        when(repositoryPort.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
+        when(repositoryPort.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+        when(externalProviderPort.authorize(any(Payment.class))).thenThrow(new RuntimeException("Timeout"));
+        Payment result = processPaymentService.execute(request);
+
+        assertEquals(PaymentStatus.FAILED, result.getStatus());
         verify(repositoryPort, times(2)).save(any(Payment.class));
     }
 }

@@ -1,4 +1,4 @@
-package com.payflow.payment_processor.core.domain;
+ package com.payflow.payment_processor.core.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,4 +21,12 @@ public class Payment {
     private String idempotencyKey;
     private PaymentStatus status;
     private LocalDateTime createdAt;
+
+    public void updateStatus(PaymentStatus newStatus) {
+
+        if (this.status == PaymentStatus.APPROVED) {
+            throw  new IllegalStateException("Payment successfully completed");
+        }
+        this.status = newStatus;
+    }
 }
